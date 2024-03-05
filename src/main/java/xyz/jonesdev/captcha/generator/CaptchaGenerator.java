@@ -34,13 +34,17 @@ import java.util.Random;
 @Getter
 public final class CaptchaGenerator {
   private final CachedCaptcha[] cached;
+  private final int imageWidth, imageHeight;
   private final Gson gson;
 
   private static final Random RANDOM = new Random();
 
-  public CaptchaGenerator(final Gson gson, final int precomputeAmount) {
+  public CaptchaGenerator(final Gson gson, final int precomputeAmount,
+                          final int imageWidth, final int imageHeight) {
     this.gson = gson;
     this.cached = new CachedCaptcha[precomputeAmount];
+    this.imageWidth = imageWidth;
+    this.imageHeight = imageHeight;
     loadResources();
   }
 
@@ -48,14 +52,15 @@ public final class CaptchaGenerator {
     try {
       // Read all resources from the current context class loader
       final Enumeration<URL> enumeration = getClass().getClassLoader().getResources("captcha_mappings/");
+      int loadedCaptchaCount = 0;
 
-      while (enumeration.hasMoreElements()) {
+      if (enumeration.hasMoreElements()) {
         final URL url = enumeration.nextElement();
         final File file = new File(url.getFile());
 
         final String[] files = file.list();
         // This should not happen
-        if (files == null) continue;
+        if (files == null) return;
 
         for (final String resourcePath : files) {
           final File mappingsFile = new File(file, resourcePath);
@@ -66,20 +71,24 @@ public final class CaptchaGenerator {
             try (final InputStreamReader reader = new InputStreamReader(inputStream)) {
               // Load the captcha properties from the file
               final CaptchaProperties properties = gson.fromJson(reader, CaptchaProperties.class);
-              loadCaptcha(properties);
+              cached[loadedCaptchaCount++] = precompute(properties);
+              // Don't continue the loop if we shouldn't compute more captchas
+              if (loadedCaptchaCount >= cached.length) break;
             }
           } catch (IOException exception) {
             throw new IllegalStateException("Could not load resource", exception);
           }
         }
       }
-    } catch (Exception exception) {
+    } catch (IOException exception) {
       throw new IllegalStateException("Could not find resources", exception);
     }
   }
 
-  private void loadCaptcha(final CaptchaProperties properties) {
-
+  private CachedCaptcha precompute(final CaptchaProperties properties) {
+    for (final String url : properties.getUrls()) {
+    }
+    return null; //TODO
   }
 
   public CachedCaptcha getRandomCaptcha() {

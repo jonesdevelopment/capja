@@ -3,7 +3,7 @@
     "lighthouse"
   ],
   "base-urls": [
-    "https://picsum.photos/id/870/128/128"
+    "https://picsum.photos/id/870/%d/%d"
   ],
   "can-grayscale": true
 }

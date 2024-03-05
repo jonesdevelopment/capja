@@ -1,0 +1,9 @@
+{
+  "translations": [
+    "lighthouse"
+  ],
+  "base-urls": [
+    "https://picsum.photos/id/870/128/128"
+  ],
+  "can-grayscale": true
+}

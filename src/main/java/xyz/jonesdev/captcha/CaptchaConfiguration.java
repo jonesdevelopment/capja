@@ -17,15 +17,15 @@
 
 package xyz.jonesdev.captcha;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import lombok.experimental.UtilityClass;
-import xyz.jonesdev.captcha.generator.CaptchaGenerator;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@UtilityClass
-public class MainTest {
-  public void main(final String... args) {
-    final Gson gson = new GsonBuilder().create();
-    new CaptchaGenerator(gson, 1, 128, 128);
-  }
+@Getter
+@RequiredArgsConstructor
+public final class CaptchaConfiguration {
+  private final int imageWidth, imageHeight;
+  private final char[] dictionary;
+  private final int answerLength;
+  private final boolean rotate, randomizePosition, blur, scale;
+  private final int randomElementsAmount;
 }

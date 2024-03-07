@@ -15,11 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.captcha.parser;
+package xyz.jonesdev.captcha;
 
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-public final class CaptchaParser {
-
+public class Main {
+  public void main(final String... args) {
+    new CaptchaGenerator(1);
+  }
 }

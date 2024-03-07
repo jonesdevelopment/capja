@@ -32,7 +32,7 @@ dependencies {
   testCompileOnly("org.projectlombok:lombok:1.18.30")
   testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
 
-  implementation("com.google.code.gson:gson:2.10.1")
+  compileOnly("org.jetbrains:annotations:24.0.1")
 }
 
 tasks {

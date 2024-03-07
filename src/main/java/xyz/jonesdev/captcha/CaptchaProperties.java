@@ -15,23 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.captcha.parser;
+package xyz.jonesdev.captcha;
 
-import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
-import java.util.List;
 
 @Getter
-@ToString
 @RequiredArgsConstructor
 public final class CaptchaProperties {
-  @SerializedName("translations")
-  private final List<String> translations;
-  @SerializedName("base-urls")
-  private final List<String> urls;
-  @SerializedName("can-grayscale")
-  private final boolean canGrayscale;
+  private final String answer;
+  private final char[] answerCharacters;
+  private final CaptchaConfiguration config;
 }

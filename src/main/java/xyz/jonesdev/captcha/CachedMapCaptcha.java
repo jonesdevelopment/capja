@@ -22,8 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public final class CachedCaptcha {
+public final class CachedMapCaptcha {
   private final String answer;
-  private final int width, height;
   private final byte[] buffer;
 }

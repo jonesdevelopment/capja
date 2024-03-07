@@ -25,7 +25,7 @@ import java.util.Random;
 
 @Getter
 public final class CaptchaGenerator {
-  private final CachedCaptcha[] cached;
+  private final CachedMapCaptcha[] cached;
   private final CaptchaConfiguration config;
 
   private static final Random RANDOM = new Random();
@@ -42,7 +42,7 @@ public final class CaptchaGenerator {
 
   public CaptchaGenerator(final int precomputeAmount,
                           final CaptchaConfiguration config) {
-    this.cached = new CachedCaptcha[precomputeAmount];
+    this.cached = new CachedMapCaptcha[precomputeAmount];
     this.config = config;
     prepareAll();
   }
@@ -57,7 +57,7 @@ public final class CaptchaGenerator {
     }
   }
 
-  private @NotNull CachedCaptcha prepare(final @NotNull CaptchaProperties properties) {
+  private @NotNull CachedMapCaptcha prepare(final @NotNull CaptchaProperties properties) {
     // Create an image for the CAPTCHA
     byte[] buffer;
     try {
@@ -66,7 +66,7 @@ public final class CaptchaGenerator {
       throw new IllegalStateException("Could not create buffer", exception);
     }
     // Create a new cached CAPTCHA and return the object
-    return new CachedCaptcha(properties.getAnswer(), config.getImageWidth(), config.getImageHeight(), buffer);
+    return new CachedMapCaptcha(properties.getAnswer(), buffer);
   }
 
   private char @NotNull [] generateRandomAnswer() {
@@ -77,16 +77,8 @@ public final class CaptchaGenerator {
     return answer;
   }
 
-  /*private @NotNull BufferedImage downloadImage(final String resourceURL) {
-    try {
-      final URL url = new URL(String.format(resourceURL, imageWidth, imageHeight));
-      return ImageIO.read(url);
-    } catch (IOException exception) {
-      throw new IllegalArgumentException("Malformed resource URL", exception);
-    }
-  }*/
-
-  public CachedCaptcha getRandomCaptcha() {
+  @SuppressWarnings("unused")
+  public CachedMapCaptcha getRandomCaptcha() {
     return cached[RANDOM.nextInt(cached.length)];
   }
 }

@@ -24,13 +24,11 @@ import org.jetbrains.annotations.Range;
 import xyz.jonesdev.captcha.filters.*;
 import xyz.jonesdev.captcha.palette.MCColorPaletteConverter;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,8 +83,6 @@ public final class CaptchaImageGenerator {
     for (final CaptchaFilter filter : filters) {
       filter.apply(this);
     }
-
-    ImageIO.write(bufferedImage, "png", new File("1.png"));
     return MCColorPaletteConverter.toMapBytes(bufferedImage);
   }
 
@@ -124,8 +120,8 @@ public final class CaptchaImageGenerator {
       if (config.isRotate()) {
         // Apply a distortion effect
         transformation.shear(
-          Math.sin(currentX * Math.random() * 2) * Math.PI / 15,
-          Math.sin(beginY * Math.random() * 2) * Math.PI / 15);
+          Math.sin(currentX * (Math.random() * 0.1) * 3) * Math.PI / 15,
+          Math.sin(beginY * (Math.random() * 0.1) * 3) * Math.PI / 15);
         // Apply a rotation effect
         transformation.rotate(Math.sin(currentX) * Math.PI / 15);
       }

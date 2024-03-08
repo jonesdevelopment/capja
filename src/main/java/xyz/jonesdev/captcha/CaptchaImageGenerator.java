@@ -21,6 +21,7 @@ import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 import xyz.jonesdev.captcha.palette.MCColorPaletteConverter;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
@@ -29,6 +30,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
+import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
@@ -75,6 +77,7 @@ public class CaptchaImageGenerator {
     if (properties.getConfig().isBlur()) {
       bufferedImage = BLUR_CONVOLVE_OP.filter(bufferedImage, null);
     }
+    ImageIO.write(bufferedImage, "png", new File("1.png"));
     return MCColorPaletteConverter.toMapBytes(bufferedImage);
   }
 
@@ -145,6 +148,12 @@ public class CaptchaImageGenerator {
       final Shape outlineShape = glyphVector.getOutline();
       // Apply a transformation to the glyph vector using AffineTransform
       final AffineTransform transformation = AffineTransform.getTranslateInstance(currentX, currentY);
+      if (config.isShear()) {
+        // Apply a distortion effect
+        final double shearX = Math.sin(currentX) * Math.PI / 14;
+        final double shearY = Math.sin(currentY) * Math.PI / 14;
+        transformation.shear(shearX, shearY);
+      }
       if (config.isRotate()) {
         // Apply a ripple/rotation effect
         transformation.rotate(Math.sin(currentX / 2) * Math.PI / (14 + RANDOM.nextInt(6)));

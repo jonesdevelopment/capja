@@ -26,6 +26,6 @@ public final class CaptchaConfiguration {
   private final int imageWidth, imageHeight;
   private final char[] dictionary;
   private final int answerLength;
-  private final boolean rotate, randomizePosition, blur, scale;
+  private final boolean shear, rotate, randomizePosition, blur, scale;
   private final int randomElementsAmount;
 }

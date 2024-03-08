@@ -25,4 +25,5 @@ import lombok.RequiredArgsConstructor;
 public final class CachedMapCaptcha {
   private final String answer;
   private final byte[] buffer;
+  private final byte[][] grid_1_7;
 }

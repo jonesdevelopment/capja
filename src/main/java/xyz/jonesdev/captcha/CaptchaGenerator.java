@@ -67,8 +67,14 @@ public final class CaptchaGenerator {
     } catch (IOException exception) {
       throw new IllegalStateException("Could not create buffer", exception);
     }
+    // Create 1.7 grid
+    final byte[][] grid = new byte[config.getImageWidth()][config.getImageHeight()];
+    for (int i = 0; i < buffer.length; i++) {
+      final byte buf = buffer[i];
+      grid[i & Byte.MAX_VALUE][i >> 7] = buf;
+    }
     // Create a new cached CAPTCHA and return the object
-    return new CachedMapCaptcha(properties.getAnswer(), buffer);
+    return new CachedMapCaptcha(properties.getAnswer(), buffer, grid);
   }
 
   private char @NotNull [] generateRandomAnswer() {

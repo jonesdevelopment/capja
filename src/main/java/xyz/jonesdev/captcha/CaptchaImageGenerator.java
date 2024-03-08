@@ -17,8 +17,11 @@
 
 package xyz.jonesdev.captcha;
 
-import lombok.experimental.UtilityClass;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
+import xyz.jonesdev.captcha.filters.*;
 import xyz.jonesdev.captcha.palette.MCColorPaletteConverter;
 
 import javax.imageio.ImageIO;
@@ -27,40 +30,47 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
-@UtilityClass
-public class CaptchaImageGenerator {
-  private final double SPACING = 3.5;
-  private final Random RANDOM = new Random();
-  private final int[] FONT_TYPES = {Font.PLAIN, Font.BOLD, Font.ITALIC, Font.ITALIC | Font.BOLD};
+@Getter
+public final class CaptchaImageGenerator {
+  private static final Random RANDOM = new Random();
+  private static final int[] FONT_TYPES = {Font.PLAIN, Font.BOLD};
+  private static final String[] FONT_NAMES = {Font.DIALOG_INPUT, Font.SANS_SERIF, Font.MONOSPACED};
 
-  private final BufferedImageOp BLUR_CONVOLVE_OP;
+  private final List<CaptchaFilter> filters = new ArrayList<>();
+  @Setter
+  private BufferedImage bufferedImage;
+  private Graphics2D graphics;
 
-  static {
-    {
-      // http://www.java2s.com/Tutorial/Java/0261__2D-Graphics/BlurourimageBlurmeansanunfocusedimage.htm
-      final float[] blurKernel = {1 / 9f, 1 / 9f, 1 / 9f, 1 / 9f, 1 / 9f, 1 / 9f, 1 / 9f, 1 / 9f, 1 / 9f};
-      // Create the convolution kernel
-      final Kernel kernel = new Kernel(3, 3, blurKernel);
-      // Create the ConvolveOp object with the kernel
-      BLUR_CONVOLVE_OP = new ConvolveOp(kernel);
+  public CaptchaImageGenerator(final @NotNull CaptchaProperties properties) {
+    if (properties.getConfig().isFishEye()) {
+      filters.add(new FishEyeImageFilter());
+    }
+    if (properties.getConfig().isShear()) {
+      filters.add(new ShearImageFilter());
+    }
+    if (properties.getConfig().isElements()) {
+      filters.add(new ElementsImageFilter(5));
+    }
+    if (properties.getConfig().isBlur()) {
+      filters.add(new BlurImageFilter());
     }
   }
 
   public byte[] createBuffer(final @NotNull CaptchaProperties properties) throws IOException {
     // Create an RGB buffered image for the CAPTCHA
-    BufferedImage bufferedImage = new BufferedImage(
+    bufferedImage = new BufferedImage(
       properties.getConfig().getImageWidth(), properties.getConfig().getImageHeight(), TYPE_INT_RGB);
+    //bufferedImage = ImageIO.read(getClass().getResourceAsStream("/textures/background.png"));
     // Get the 2D graphics object for the image
-    final Graphics2D graphics = (Graphics2D) bufferedImage.getGraphics();
+    graphics = (Graphics2D) bufferedImage.getGraphics();
 
     // Draw background
     graphics.setBackground(Color.WHITE);
@@ -68,110 +78,70 @@ public class CaptchaImageGenerator {
     // Change some rendering hints for quality and performance
     graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    // Draw random elements on background
-    drawRandomElements(bufferedImage, graphics, properties.getConfig().getRandomElementsAmount());
     // Draw characters
     drawCharacters(bufferedImage, graphics, properties.getConfig(), properties.getAnswerCharacters());
 
-    // Apply blur effect
-    if (properties.getConfig().isBlur()) {
-      bufferedImage = BLUR_CONVOLVE_OP.filter(bufferedImage, null);
+    // Apply filters
+    for (final CaptchaFilter filter : filters) {
+      filter.apply(this);
     }
+
     ImageIO.write(bufferedImage, "png", new File("1.png"));
     return MCColorPaletteConverter.toMapBytes(bufferedImage);
-  }
-
-  private void drawRandomElements(final @NotNull BufferedImage bufferedImage,
-                                  final @NotNull Graphics2D graphics,
-                                  final int amount) {
-    final int halfWidth = bufferedImage.getWidth() / 2;
-    final int halfHeight = bufferedImage.getHeight() / 2;
-
-    for (int i = 0; i < amount; i++) {
-      final int startX = RANDOM.nextInt(halfWidth);
-      final int startY = RANDOM.nextInt(halfHeight);
-      final int endX = halfWidth + RANDOM.nextInt(halfWidth);
-      final int endY = halfHeight + RANDOM.nextInt(halfHeight);
-
-      final int r = 80 + RANDOM.nextInt(80);
-      final int g = 80 + RANDOM.nextInt(80);
-      final int b = 80 + RANDOM.nextInt(80);
-      graphics.setColor(new Color(r, g, b));
-
-      // Select a random element
-      switch (RANDOM.nextInt(4)) {
-        default:
-        case 0:
-          graphics.drawLine(startX, startY, endX, endY);
-          break;
-        case 1:
-          graphics.drawOval(startX, startY, endX, endY);
-          break;
-        case 2:
-          graphics.fillRect(startX, startY, 1, 1);
-          break;
-      }
-    }
   }
 
   private void drawCharacters(final @NotNull BufferedImage bufferedImage,
                               final @NotNull Graphics2D graphics,
                               final @NotNull CaptchaConfiguration config,
                               final char[] chars) {
-    // Set font for the text
-    @SuppressWarnings("all")
-    final Font font = new Font(
-      Font.MONOSPACED, FONT_TYPES[RANDOM.nextInt(FONT_TYPES.length)],
-      45 + RANDOM.nextInt(6) - (config.getAnswerLength() * 2));
-    graphics.setFont(font);
-
     // Create font render context
     final FontRenderContext ctx = graphics.getFontRenderContext();
+    final Font defaultFont = new Font(Font.MONOSPACED, Font.PLAIN,
+      46 + RANDOM.nextInt(6) - (config.getAnswerLength() * 2));
 
     // Calculate string width
-    final double stringWidth = font.getStringBounds(chars, 0, chars.length, ctx).getWidth();
+    final double stringWidth = defaultFont.getStringBounds(chars, 0, chars.length, ctx).getWidth();
     // Calculate character positions
     final double beginX = (bufferedImage.getWidth() - stringWidth) * 0.5;
-    final double beginY = (bufferedImage.getHeight() + font.getSize() * 0.5) * 0.5;
+    final double beginY = (bufferedImage.getHeight() + defaultFont.getSize() * 0.5) * 0.5;
     double currentX = beginX;
-    double currentY = beginY;
 
     // Draw each character one by one
     for (final char character : chars) {
-      final int r = RANDOM.nextInt(90);
-      final int g = RANDOM.nextInt(90);
-      final int b = RANDOM.nextInt(90);
-      graphics.setColor(new Color(r, g, b));
+      graphics.setColor(getRandomColor(10, 80));
+
+      // Create a font with the chosen font name
+      final Font font = new Font(
+        FONT_NAMES[RANDOM.nextInt(FONT_NAMES.length)],
+        FONT_TYPES[RANDOM.nextInt(FONT_TYPES.length)], defaultFont.getSize());
+      graphics.setFont(font);
 
       // Create a glyph vector for the character
       final GlyphVector glyphVector = font.createGlyphVector(ctx, String.valueOf(character));
       final Shape outlineShape = glyphVector.getOutline();
       // Apply a transformation to the glyph vector using AffineTransform
-      final AffineTransform transformation = AffineTransform.getTranslateInstance(currentX, currentY);
-      if (config.isShear()) {
-        // Apply a distortion effect
-        final double shearX = Math.sin(currentX) * Math.PI / 14;
-        final double shearY = Math.sin(currentY) * Math.PI / 14;
-        transformation.shear(shearX, shearY);
-      }
+      final AffineTransform transformation = AffineTransform.getTranslateInstance(currentX, beginY);
       if (config.isRotate()) {
-        // Apply a ripple/rotation effect
-        transformation.rotate(Math.sin(currentX / 2) * Math.PI / (14 + RANDOM.nextInt(6)));
+        // Apply a distortion effect
+        transformation.shear(
+          Math.sin(currentX * Math.random() * 2) * Math.PI / 15,
+          Math.sin(beginY * Math.random() * 2) * Math.PI / 15);
+        // Apply a rotation effect
+        transformation.rotate(Math.sin(currentX) * Math.PI / 15);
       }
-      if (config.isScale()) {
-        // Apply a ripple/rotation effect
-        transformation.scale(1 + Math.sin(currentX) / 6, 1 + Math.sin(currentY) / 6);
-      }
-      // Draw the character
       final Shape shape = transformation.createTransformedShape(outlineShape);
       graphics.fill(shape);
       // Update next X position
-      currentX += glyphVector.getVisualBounds().getWidth() + SPACING;
-      if (config.isRandomizePosition()) {
-        // Randomize next position
-        currentX += (0.5 - RANDOM.nextDouble()) * SPACING;
-        currentY += (0.5 - RANDOM.nextDouble()) * SPACING;
-      }
+      final double characterSpacing = 3;
+      currentX += glyphVector.getVisualBounds().getWidth() + characterSpacing;
     }
+  }
+
+  public @NotNull Color getRandomColor(final @Range(from = 0, to = 255) int min,
+                                       final @Range(from = 0, to = 255) int bound) {
+    final int r = Math.min(min + RANDOM.nextInt(bound), 255);
+    final int g = Math.min(min + RANDOM.nextInt(bound), 255);
+    final int b = Math.min(min + RANDOM.nextInt(bound), 255);
+    return new Color(r, g, b);
   }
 }

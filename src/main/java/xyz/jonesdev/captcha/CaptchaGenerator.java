@@ -34,7 +34,7 @@ public final class CaptchaGenerator {
 
   private static final CaptchaConfiguration DEFAULT_CONFIG = new CaptchaConfiguration(
     128, 128, NUMBERS, 5,
-    true, true, true, true, true);
+    true, true, false, true, true);
 
   public CaptchaGenerator(final int precomputeAmount) {
     this(precomputeAmount, DEFAULT_CONFIG);

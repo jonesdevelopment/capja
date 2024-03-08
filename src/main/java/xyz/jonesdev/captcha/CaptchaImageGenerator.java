@@ -96,11 +96,11 @@ public final class CaptchaImageGenerator {
                               final char[] chars) {
     // Create font render context
     final FontRenderContext ctx = graphics.getFontRenderContext();
-    final Font defaultFont = new Font(Font.MONOSPACED, Font.PLAIN,
+    final Font defaultFont = new Font(Font.DIALOG, Font.PLAIN,
       46 + RANDOM.nextInt(6) - (config.getAnswerLength() * 2));
 
     // Calculate string width
-    final double stringWidth = defaultFont.getStringBounds(chars, 0, chars.length, ctx).getWidth();
+    final double stringWidth = defaultFont.getStringBounds(chars, 0, chars.length, ctx).getWidth() * 0.9;
     // Calculate character positions
     final double beginX = (bufferedImage.getWidth() - stringWidth) * 0.5;
     final double beginY = (bufferedImage.getHeight() + defaultFont.getSize() * 0.5) * 0.5;

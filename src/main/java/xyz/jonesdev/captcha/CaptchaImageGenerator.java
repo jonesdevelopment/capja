@@ -111,7 +111,8 @@ public final class CaptchaImageGenerator {
 
       // Create a font with the chosen font name
       final Font font = new Font(
-        FONT_NAMES[RANDOM.nextInt(FONT_NAMES.length)],
+        // 0 and 1 are easier to read for a human when Monospaced is used
+        character == 0 || character == 1 ? Font.MONOSPACED : FONT_NAMES[RANDOM.nextInt(FONT_NAMES.length)],
         FONT_TYPES[RANDOM.nextInt(FONT_TYPES.length)], defaultFont.getSize());
       graphics.setFont(font);
 

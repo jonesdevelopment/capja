@@ -29,15 +29,8 @@ public final class FishEyeImageFilter implements CaptchaFilter {
     final int height = generator.getBufferedImage().getHeight();
     final int width = generator.getBufferedImage().getWidth();
 
-    final int[] src = new int[height * width];
-    int j = 0;
-
-    for (int j1 = 0; j1 < width; j1++) {
-      for (int k1 = 0; k1 < height; k1++) {
-        src[j] = generator.getBufferedImage().getRGB(j1, k1);
-        j++;
-      }
-    }
+    final int[] src = new int[width * height];
+    generator.getBufferedImage().getRGB(0, 0, width, height, src, 0, width);
 
     final double randomDistance = (int) (width / 6 + ((width / 4 - width / 6) + 1) * Math.random());
 

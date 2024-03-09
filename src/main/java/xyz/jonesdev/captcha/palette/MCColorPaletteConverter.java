@@ -22,36 +22,73 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
 
 @UtilityClass
 public class MCColorPaletteConverter {
-  private final int[] COLOR_MAP = new int[]{-16777216, -16777216, -16777216, -16777216, -10912473, -9594576, -8408520,
-    -12362211, -5331853, -2766452, -530013, -8225962, -7566196, -5526613, -3684409, -9868951, -4980736,
-    -2359296, -65536, -7929856, -9408332, -7697700, -6250241, -11250553, -9079435, -7303024, -5789785,
-    -10987432, -16754944, -16750080, -16745472, -16760576, -4934476, -2302756, -1, -7895161, -9210239, -7499618,
-    -5986120, -11118495, -9810890, -8233406, -6853299, -11585240, -11579569, -10461088, -9408400, -12895429,
-    -13816396, -13158436, -12566273, -14605945, -10202062, -8690114, -7375032, -11845850, -4935252, -2303533,
-    -779, -7895679, -6792924, -4559572, -2588877, -9288933, -8571496, -6733382, -5092136, -10606478, -12030824,
-    -10976070, -10053160, -13217422, -6184668, -3816148, -1710797, -8816357, -10907631, -9588715, -8401895,
-    -12358643, -5613196, -3117682, -884827, -8371369, -13290187, -12500671, -11776948, -14145496, -9671572,
-    -8092540, -6710887, -11447983, -13280916, -12489340, -11763815, -14138543, -10933123, -9619815, -8437838,
-    -12377762, -14404227, -13876839, -13415246, -14997410, -12045020, -10993364, -10073037, -13228005,
-    -12035804, -10982100, -10059981, -13221093, -9690076, -8115156, -6737101, -11461861, -15658735, -15395563,
-    -15132391, -15921907, -5199818, -2634430, -332211, -8094168, -12543338, -11551561, -10691627, -13601936,
-    -13346124, -12620068, -11894529, -14204025, -16738008, -16729294, -16721606, -16748002, -10798046, -9483734,
-    -8301007, -12309223, -11599616, -10485504, -9436672, -12910336};
-
-  private final Map<Integer, Byte> COLOR_TO_INDEX = new HashMap<>(COLOR_MAP.length);
-
-  static {
-    for (int i = 4; i < COLOR_MAP.length; ++i) {
-      final int rgb = COLOR_MAP[i];
-      final byte index = (byte) (i < 128 ? i : -129 + (i - 127));
-      COLOR_TO_INDEX.put(rgb, index);
-    }
-  }
+  private static final Color[] BASE_PALETTE = {
+    new Color(0, 0, 0),
+    new Color(127, 178, 56),
+    new Color(247, 233, 163),
+    new Color(199, 199, 199),
+    new Color(255, 0, 0),
+    new Color(160, 160, 160),
+    new Color(167, 167, 167),
+    new Color(0, 124, 0),
+    new Color(255, 255, 255),
+    new Color(164, 168, 184),
+    new Color(151, 109, 77),
+    new Color(112, 112, 112),
+    new Color(64, 64, 255),
+    new Color(143, 119, 72),
+    new Color(255, 252, 245),
+    new Color(216, 127, 51),
+    new Color(178, 76, 216),
+    new Color(102, 153, 216),
+    new Color(229, 229, 51),
+    new Color(127, 204, 25),
+    new Color(242, 127, 165),
+    new Color(76, 76, 76),
+    new Color(153, 153, 153),
+    new Color(76, 127, 153),
+    new Color(127, 63, 178),
+    new Color(51, 76, 178),
+    new Color(102, 76, 51),
+    new Color(102, 127, 51),
+    new Color(153, 51, 51),
+    new Color(25, 25, 25),
+    new Color(250, 238, 77),
+    new Color(92, 219, 213),
+    new Color(74, 128, 255),
+    new Color(0, 217, 58),
+    new Color(129, 86, 49),
+    new Color(112, 2, 0),
+    new Color(209, 177, 161),
+    new Color(159, 82, 36),
+    new Color(149, 87, 108),
+    new Color(112, 108, 138),
+    new Color(186, 133, 36),
+    new Color(103, 117, 53),
+    new Color(160, 77, 78),
+    new Color(57, 41, 35),
+    new Color(135, 107, 98),
+    new Color(87, 92, 92),
+    new Color(122, 73, 88),
+    new Color(76, 62, 92),
+    new Color(76, 50, 35),
+    new Color(76, 82, 42),
+    new Color(142, 60, 46),
+    new Color(37, 22, 16),
+    new Color(189, 48, 49),
+    new Color(148, 63, 97),
+    new Color(92, 25, 29),
+    new Color(22, 126, 134),
+    new Color(58, 142, 140),
+    new Color(86, 44, 62),
+    new Color(20, 180, 133),
+    new Color(100, 100, 100),
+    new Color(216, 175, 147),
+    new Color(127, 167, 150),
+  };
 
   public byte @NotNull [] toMapBytes(final @NotNull BufferedImage bufferedImage) {
     final int[] result = bufferedImage.getRGB(
@@ -59,47 +96,40 @@ public class MCColorPaletteConverter {
       null, 0, bufferedImage.getWidth());
     final byte[] buffer = new byte[result.length];
     for (int i = 0; i < buffer.length; ++i) {
-      buffer[i] = matchPaletteColor(result[i]);
+      buffer[i] = matchPaletteColor(new Color(result[i]));
     }
     return buffer;
   }
 
-  private byte matchPaletteColor(final int rgb) {
+  private byte matchPaletteColor(final @NotNull Color color) {
     // Make sure to avoid trying to match transparent colors
-    if ((rgb & 0xFF000000) >>> 24 < 128) return 0;
-    // Return the mapped color stored in the buffer
-    final Byte color = COLOR_TO_INDEX.get(rgb);
-    // Return the cached color if possible
-    if (color != null) return color;
-
-    // Calculate the best possible color match
-    int slot = 0;
-    double best = -1.0D;
-
-    for (int i = 4; i < COLOR_MAP.length; ++i) {
-      final double distance = getDistance(rgb, Color.BLACK.getRGB());//COLOR_MAP[i]);
-      if (distance < best || best == -1.0D) {
-        best = distance;
-        slot = i;
-      }
-    }
-    return (byte) (slot < 128 ? slot : -129 + (slot - 127));
+    if (color.getAlpha() < 128) return 0;
+    // Map all colors to bytes
+    return nearestColor(color);
   }
 
-  private double getDistance(final int rgb0, final int rgb1) {
-    final int _r0 = (rgb0 >> 16) & 0xff;
-    final int _g0 = (rgb0 >> 8) & 0xff;
-    final int _b0 = rgb0 & 0xff;
-    final int _r1 = (rgb1 >> 16) & 0xff;
-    final int _g1 = (rgb1 >> 8) & 0xff;
-    final int _b1 = rgb1 & 0xff;
-    final double mean = (double) (_r0 + _r1) / 2.0D;
-    final double r = (_r0 - _r1);
-    final double g = (_g0 - _g1);
-    final double b = _b0 - _b1;
-    final double weightR = 2D + mean / 256D;
-    final double weightG = 4D;
-    final double weightB = 2D + (255D - mean) / 256D;
-    return weightR * r * r + weightG * g * g + weightB * b * b;
+  private byte nearestColor(final Color color) {
+    double min = -1, distance;
+    byte nearest = 0;
+    int index = 0;
+    for (final Color c : BASE_PALETTE) {
+      distance = distance(color, c);
+      if (min == -1 || distance < min) {
+        min = distance;
+        nearest = (byte) ++index;
+      }
+    }
+    return nearest;
+  }
+
+  private double distance(final @NotNull Color color,
+                          final @NotNull Color color1) {
+    final int[] i1 = new int[] {color.getRed(), color.getGreen(), color.getBlue()};
+    final int[] i2 = new int[] {color1.getRed(), color1.getGreen(), color1.getBlue()};
+    double distance = 0;
+    for (int i = 0; i < 3; i++) {
+      distance += Math.pow(i1[i] - i2[i], 2);
+    }
+    return distance;
   }
 }

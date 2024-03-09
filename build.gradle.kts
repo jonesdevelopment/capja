@@ -32,6 +32,7 @@ dependencies {
   testCompileOnly("org.projectlombok:lombok:1.18.30")
   testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
 
+  implementation("com.jhlabs:filters:2.0.235-1")
   compileOnly("org.jetbrains:annotations:24.0.1")
 }
 
@@ -46,6 +47,9 @@ tasks {
   }
 
   shadowJar {
+    // Minimize jar
+    minimize()
+
     // Set the file name of the shadowed jar
     archiveFileName.set("${rootProject.name}.jar")
 
@@ -53,12 +57,10 @@ tasks {
     isPreserveFileTimestamps = false
 
     // Relocate libraries
-    relocate("com.google.gson", "xyz.jonesdev.sonar.libs.gson")
+    relocate("com.jhlabs", "xyz.jonesdev.captcha.libs.jhlabs")
 
     // Exclude unnecessary metadata information
     exclude("META-INF/*/**")
-    // We want to load our own Gson dynamically
-    exclude("com/google/gson/**")
   }
 
   compileJava {

@@ -19,6 +19,7 @@ package xyz.jonesdev.captcha;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import xyz.jonesdev.captcha.config.CaptchaConfiguration;
 
 @Getter
 @RequiredArgsConstructor

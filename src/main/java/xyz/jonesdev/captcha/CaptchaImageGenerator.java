@@ -17,11 +17,13 @@
 
 package xyz.jonesdev.captcha;
 
+import com.jhlabs.image.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
-import xyz.jonesdev.captcha.filters.*;
+import xyz.jonesdev.captcha.config.CaptchaConfiguration;
+import xyz.jonesdev.captcha.filters.CustomScratchFilter;
 import xyz.jonesdev.captcha.palette.MCColorPaletteConverter;
 
 import javax.imageio.ImageIO;
@@ -30,51 +32,58 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-
-import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 @Getter
 public final class CaptchaImageGenerator {
   private static final Random RANDOM = new Random();
-  private static final int[] FONT_TYPES = {Font.PLAIN, Font.BOLD};
-  private static final String[] FONT_NAMES = {Font.DIALOG_INPUT, Font.SANS_SERIF, Font.MONOSPACED};
 
-  private final List<CaptchaFilter> filters = new ArrayList<>();
+  private static final int[] FONT_TYPES = {Font.PLAIN, Font.BOLD};
+  private static final String[] FONT_NAMES = {Font.DIALOG, Font.DIALOG_INPUT, Font.SANS_SERIF, Font.MONOSPACED};
+
+  private static final BufferedImageOp[] FILTERS = {
+    new CustomScratchFilter(8),
+    //new OilFilter(), // blob-ify
+    new UnsharpFilter(), // blur
+    new MinimumFilter(), // crank image up
+    new MaximumFilter(), // crank image down
+    new SaturationFilter(0.3f), // change saturation
+    //new NoiseFilter(), // random noise
+  };
+
+  private final BufferedImageOp[] randomFilters;
+  private final CaptchaProperties properties;
   @Setter
   private BufferedImage bufferedImage;
   private Graphics2D graphics;
 
   public CaptchaImageGenerator(final @NotNull CaptchaProperties properties) {
-    if (properties.getConfig().isFishEye()) {
-      filters.add(new FishEyeImageFilter());
-    }
-    if (properties.getConfig().isElements()) {
-      filters.add(new ElementsImageFilter(5));
-    }
-    if (properties.getConfig().isShear()) {
-      filters.add(new ShearImageFilter());
-    }
-    if (properties.getConfig().isBlur()) {
-      filters.add(new BlurImageFilter());
-    }
+    this.properties = properties;
+
+    // Prepare filters
+    final FlareFilter flareFilter = new FlareFilter();
+    flareFilter.setRadius(properties.getConfig().getImageWidth() / 3f);
+    flareFilter.setBaseAmount(0.7f);
+    final RippleFilter rippleFilter = new RippleFilter();
+    rippleFilter.setXAmplitude(5 + (int) (0.5 - Math.random() * 3));
+    rippleFilter.setYAmplitude(10 + (int) (0.5 - Math.random() * 5));
+    final SmearFilter smearFilter = new SmearFilter();
+    smearFilter.setDensity(0.075f * (float) Math.random());
+    final PinchFilter pinchFilter = new PinchFilter();
+    pinchFilter.setAmount((float) (0.5 - Math.random()) * 0.1f);
+
+    this.randomFilters = new BufferedImageOp[]{flareFilter, rippleFilter, smearFilter, pinchFilter};
   }
 
-  public byte[] createBuffer(final @NotNull CaptchaProperties properties) throws IOException {
+  public byte[] createImage() throws IOException {
     // Create an RGB buffered image for the CAPTCHA
-    bufferedImage = new BufferedImage(
-      properties.getConfig().getImageWidth(), properties.getConfig().getImageHeight(), TYPE_INT_RGB);
-    //bufferedImage = ImageIO.read(getClass().getResourceAsStream("/textures/background.png"));
+    bufferedImage = BackgroundImageGenerator.getRandomBackground(properties);
     // Get the 2D graphics object for the image
     graphics = (Graphics2D) bufferedImage.getGraphics();
 
-    // Draw background
-    graphics.setBackground(Color.WHITE);
-    graphics.fillRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
     // Change some rendering hints for quality and performance
     graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -82,11 +91,19 @@ public final class CaptchaImageGenerator {
     drawCharacters(bufferedImage, graphics, properties.getConfig(), properties.getAnswerCharacters());
 
     // Apply filters
-    for (final CaptchaFilter filter : filters) {
-      filter.apply(this);
-    }
+    applyFilters(FILTERS);
+    applyFilters(randomFilters);
+
+    // Save image (temporary)
     ImageIO.write(bufferedImage, "png", new File("1.png"));
+    // Return converted color bytes
     return MCColorPaletteConverter.toMapBytes(bufferedImage);
+  }
+
+  private void applyFilters(final BufferedImageOp @NotNull [] filters) {
+    for (final BufferedImageOp filter : filters) {
+      bufferedImage = filter.filter(bufferedImage, null);
+    }
   }
 
   private void drawCharacters(final @NotNull BufferedImage bufferedImage,
@@ -96,7 +113,7 @@ public final class CaptchaImageGenerator {
     // Create font render context
     final FontRenderContext ctx = graphics.getFontRenderContext();
     final Font defaultFont = new Font(Font.DIALOG, Font.PLAIN,
-      46 + RANDOM.nextInt(6) - (config.getAnswerLength() * 2));
+      47 + RANDOM.nextInt(6) - (config.getAnswerLength() * 2));
 
     // Calculate string width
     final double stringWidth = defaultFont.getStringBounds(chars, 0, chars.length, ctx).getWidth() * 0.9;
@@ -107,32 +124,23 @@ public final class CaptchaImageGenerator {
 
     // Draw each character one by one
     for (final char character : chars) {
-      graphics.setColor(getRandomColor(10, 80));
+      graphics.setColor(getRandomColor(30, 90));
 
       // Create a font with the chosen font name
       final Font font = new Font(
-        // 0 and 1 are easier to read for a human when Monospaced is used
-        character == 0 || character == 1 ? Font.MONOSPACED : FONT_NAMES[RANDOM.nextInt(FONT_NAMES.length)],
+        // 1 is easier to read for a human when Monospaced is used
+        character == 1 ? Font.MONOSPACED : FONT_NAMES[RANDOM.nextInt(FONT_NAMES.length)],
         FONT_TYPES[RANDOM.nextInt(FONT_TYPES.length)], defaultFont.getSize());
       graphics.setFont(font);
 
       // Create a glyph vector for the character
       final GlyphVector glyphVector = font.createGlyphVector(ctx, String.valueOf(character));
-      final Shape outlineShape = glyphVector.getOutline();
       // Apply a transformation to the glyph vector using AffineTransform
       final AffineTransform transformation = AffineTransform.getTranslateInstance(currentX, beginY);
-      if (config.isRotate()) {
-        // Apply a distortion effect
-        transformation.shear(
-          Math.sin(currentX * (Math.random() * 0.1) * 3) * Math.PI / 15,
-          Math.sin(beginY * (Math.random() * 0.1) * 3) * Math.PI / 15);
-        // Apply a rotation effect
-        transformation.rotate(Math.sin(currentX) * Math.PI / 15);
-      }
-      final Shape shape = transformation.createTransformedShape(outlineShape);
+      final Shape shape = transformation.createTransformedShape(glyphVector.getOutline());
       graphics.fill(shape);
       // Update next X position
-      final double characterSpacing = 3;
+      final double characterSpacing = 2.75;
       currentX += glyphVector.getVisualBounds().getWidth() + characterSpacing;
     }
   }

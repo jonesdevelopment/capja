@@ -15,16 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.captcha.filters;
+package xyz.jonesdev.captcha.config;
 
-import org.jetbrains.annotations.NotNull;
-import xyz.jonesdev.captcha.CaptchaImageGenerator;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import java.util.Random;
-
-@FunctionalInterface
-public interface CaptchaFilter {
-  Random RANDOM = new Random();
-
-  void apply(final @NotNull CaptchaImageGenerator generator);
+@Getter
+@RequiredArgsConstructor
+public final class CaptchaConfiguration {
+  private final int imageWidth, imageHeight;
+  private final char[] dictionary;
+  private final int answerLength;
+  private final boolean blur, rotate, fishEye, shear, elements;
 }

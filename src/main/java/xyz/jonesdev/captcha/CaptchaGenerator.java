@@ -19,6 +19,7 @@ package xyz.jonesdev.captcha;
 
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import xyz.jonesdev.captcha.config.CaptchaConfiguration;
 
 import java.io.IOException;
 import java.util.Random;
@@ -30,10 +31,10 @@ public final class CaptchaGenerator {
   private int loadedCaptchas;
 
   private static final Random RANDOM = new Random();
-  private static final char[] NUMBERS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+  private static final char[] DICTIONARY = {'0', '1', '2', '3', '5', '6', '9'};
 
   private static final CaptchaConfiguration DEFAULT_CONFIG = new CaptchaConfiguration(
-    128, 128, NUMBERS, 5,
+    128, 128, DICTIONARY, 5,
     true, true, false, true, true);
 
   public CaptchaGenerator(final int precomputeAmount) {
@@ -63,7 +64,7 @@ public final class CaptchaGenerator {
     byte[] buffer;
     try {
       final CaptchaImageGenerator imageGenerator = new CaptchaImageGenerator(properties);
-      buffer = imageGenerator.createBuffer(properties);
+      buffer = imageGenerator.createImage();
     } catch (IOException exception) {
       throw new IllegalStateException("Could not create buffer", exception);
     }
@@ -71,7 +72,9 @@ public final class CaptchaGenerator {
     final byte[][] grid = new byte[config.getImageWidth()][config.getImageHeight()];
     for (int i = 0; i < buffer.length; i++) {
       final byte buf = buffer[i];
-      grid[i & Byte.MAX_VALUE][i >> 7] = buf;
+      if (i >> 7 < Byte.MAX_VALUE + 1) {
+        grid[i & Byte.MAX_VALUE][i >> 7] = buf;
+      }
     }
     // Create a new cached CAPTCHA and return the object
     return new CachedMapCaptcha(properties.getAnswer(), buffer, grid);

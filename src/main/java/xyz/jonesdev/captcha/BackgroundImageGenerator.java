@@ -17,14 +17,19 @@
 
 package xyz.jonesdev.captcha;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import com.jhlabs.image.CausticsFilter;
+import lombok.experimental.UtilityClass;
 
-@Getter
-@RequiredArgsConstructor
-public final class CaptchaConfiguration {
-  private final int imageWidth, imageHeight;
-  private final char[] dictionary;
-  private final int answerLength;
-  private final boolean blur, rotate, fishEye, shear, elements;
+import java.awt.image.BufferedImage;
+
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+
+@UtilityClass
+public class BackgroundImageGenerator {
+  public BufferedImage getRandomBackground(final CaptchaProperties properties) {
+    BufferedImage bufferedImage = new BufferedImage(
+      properties.getConfig().getImageWidth(), properties.getConfig().getImageHeight(), TYPE_INT_RGB);
+    bufferedImage = new CausticsFilter().filter(bufferedImage, null);
+    return bufferedImage;
+  }
 }

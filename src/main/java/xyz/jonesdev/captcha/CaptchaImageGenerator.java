@@ -33,7 +33,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -44,17 +43,7 @@ public final class CaptchaImageGenerator {
   private static final int[] FONT_TYPES = {Font.PLAIN, Font.BOLD};
   private static final String[] FONT_NAMES = {Font.DIALOG, Font.DIALOG_INPUT, Font.SANS_SERIF, Font.MONOSPACED};
 
-  private static final List<BufferedImageOp> FILTERS = Arrays.asList(
-    new CustomScratchFilter(8),
-    //new OilFilter(), // blob-ify
-    new UnsharpFilter(), // blur
-    new MinimumFilter(), // crank image up
-    new MaximumFilter(), // crank image down
-    //new NoiseFilter(), // random noise
-    new SaturationFilter(0.3f) // change saturation
-  );
-
-  private final List<BufferedImageOp> randomFilters = new ArrayList<>(5);
+  private final List<BufferedImageOp> randomFilters = new ArrayList<>(9);
   private final CaptchaProperties properties;
   @Setter
   private BufferedImage bufferedImage;
@@ -64,6 +53,14 @@ public final class CaptchaImageGenerator {
     this.properties = properties;
 
     // Prepare filters
+    if (properties.getConfig().isScratches()) {
+      final CustomScratchFilter scratchFilter = new CustomScratchFilter(5 + RANDOM.nextInt(6));
+      randomFilters.add(scratchFilter);
+    }
+    randomFilters.add(new UnsharpFilter());
+    randomFilters.add(new MinimumFilter());
+    randomFilters.add(new MaximumFilter());
+    randomFilters.add(new SaturationFilter(0.3f));
     if (properties.getConfig().isFlare()) {
       final FlareFilter flareFilter = new FlareFilter();
       flareFilter.setRadius(properties.getConfig().getImageWidth() / 3f);
@@ -101,8 +98,9 @@ public final class CaptchaImageGenerator {
     drawCharacters(bufferedImage, graphics, properties.getConfig(), properties.getAnswerCharacters());
 
     // Apply filters
-    applyFilters(FILTERS);
-    applyFilters(randomFilters);
+    for (final BufferedImageOp filter : randomFilters) {
+      bufferedImage = filter.filter(bufferedImage, null);
+    }
 
     /*try {
       ImageIO.write(bufferedImage, "png", new File("1.png"));
@@ -111,12 +109,6 @@ public final class CaptchaImageGenerator {
 
     // Return converted color bytes
     return MCColorPaletteConverter.toMapBytes(bufferedImage);
-  }
-
-  private void applyFilters(final @NotNull List<BufferedImageOp> filters) {
-    for (final BufferedImageOp filter : filters) {
-      bufferedImage = filter.filter(bufferedImage, null);
-    }
   }
 
   private void drawCharacters(final @NotNull BufferedImage bufferedImage,

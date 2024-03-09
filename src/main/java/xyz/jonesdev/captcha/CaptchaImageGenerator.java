@@ -53,11 +53,11 @@ public final class CaptchaImageGenerator {
     if (properties.getConfig().isFishEye()) {
       filters.add(new FishEyeImageFilter());
     }
-    if (properties.getConfig().isShear()) {
-      filters.add(new ShearImageFilter());
-    }
     if (properties.getConfig().isElements()) {
       filters.add(new ElementsImageFilter(5));
+    }
+    if (properties.getConfig().isShear()) {
+      filters.add(new ShearImageFilter());
     }
     if (properties.getConfig().isBlur()) {
       filters.add(new BlurImageFilter());

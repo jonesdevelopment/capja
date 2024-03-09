@@ -111,12 +111,13 @@ public class MCColorPaletteConverter {
   private byte nearestColor(final Color color) {
     double min = -1, distance;
     byte nearest = 0;
-    int index = 0;
+    byte index = 0;
     for (final Color c : BASE_PALETTE) {
+      ++index;
       distance = distance(color, c);
       if (min == -1 || distance < min) {
         min = distance;
-        nearest = (byte) ++index;
+        nearest = index;
       }
     }
     return nearest;

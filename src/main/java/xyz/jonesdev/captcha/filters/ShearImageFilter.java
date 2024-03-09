@@ -27,7 +27,7 @@ import java.awt.*;
 // https://github.com/logicsquad/nanocaptcha/blob/develop/src/main/java/net/logicsquad/nanocaptcha/image/filter/ShearImageFilter.java
 @RequiredArgsConstructor
 public final class ShearImageFilter implements CaptchaFilter {
-  private final int div = 20;
+  private final int div = 40;
   private final int phase = 100;
 
   @Override
@@ -44,11 +44,8 @@ public final class ShearImageFilter implements CaptchaFilter {
     final int phase = RANDOM.nextInt(5) + 2;
 
     for (int i = 0; i < height; i++) {
-      double d = (period >> 1) * Math.sin((double) i / (double) period + (Math.PI * 2 * phase) / div);
-      graphics.copyArea(0, i, width, 1, (int) d, 0);
-      graphics.setColor(Color.WHITE);
-      graphics.drawLine((int) d, i, 0, i);
-      graphics.drawLine((int) d + width, i, width, i);
+      final double dx = (period >> 1) * Math.sin((double) i / (double) period + (Math.PI * 2 * phase) / div);
+      graphics.copyArea(0, i, width, 1, (int) dx, 0);
     }
   }
 
@@ -56,11 +53,8 @@ public final class ShearImageFilter implements CaptchaFilter {
     int period = RANDOM.nextInt(30) + 10;
 
     for (int i = 0; i < width; i++) {
-      double d = (period >> 1) * Math.sin((float) i / period + (Math.PI * 2 * phase) / div);
-      graphics.copyArea(i, 0, 1, height, 0, (int) d);
-      graphics.setColor(Color.WHITE);
-      graphics.drawLine(i, (int) d, i, 0);
-      graphics.drawLine(i, (int) d + height, i, height);
+      final double dy = (period >> 1) * Math.sin((float) i / period + (Math.PI * 2 * phase) / div);
+      graphics.copyArea(i, 0, 1, height, 0, (int) dy);
     }
   }
 }

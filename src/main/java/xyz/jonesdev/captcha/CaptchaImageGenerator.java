@@ -26,15 +26,12 @@ import xyz.jonesdev.captcha.config.CaptchaConfiguration;
 import xyz.jonesdev.captcha.filters.CustomScratchFilter;
 import xyz.jonesdev.captcha.palette.MCColorPaletteConverter;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 
 @Getter
@@ -78,7 +75,7 @@ public final class CaptchaImageGenerator {
     this.randomFilters = new BufferedImageOp[]{flareFilter, rippleFilter, smearFilter, pinchFilter};
   }
 
-  public byte[] createImage() throws IOException {
+  public byte @NotNull [] createImage() {
     // Create an RGB buffered image for the CAPTCHA
     bufferedImage = BackgroundImageGenerator.getRandomBackground(properties);
     // Get the 2D graphics object for the image
@@ -94,8 +91,6 @@ public final class CaptchaImageGenerator {
     applyFilters(FILTERS);
     applyFilters(randomFilters);
 
-    // Save image (temporary)
-    ImageIO.write(bufferedImage, "png", new File("1.png"));
     // Return converted color bytes
     return MCColorPaletteConverter.toMapBytes(bufferedImage);
   }

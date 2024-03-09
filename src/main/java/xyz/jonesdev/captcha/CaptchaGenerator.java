@@ -21,7 +21,6 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import xyz.jonesdev.captcha.config.CaptchaConfiguration;
 
-import java.io.IOException;
 import java.util.Random;
 
 @Getter
@@ -61,13 +60,8 @@ public final class CaptchaGenerator {
 
   private @NotNull CachedMapCaptcha prepare(final @NotNull CaptchaProperties properties) {
     // Create an image for the CAPTCHA
-    byte[] buffer;
-    try {
-      final CaptchaImageGenerator imageGenerator = new CaptchaImageGenerator(properties);
-      buffer = imageGenerator.createImage();
-    } catch (IOException exception) {
-      throw new IllegalStateException("Could not create buffer", exception);
-    }
+    final CaptchaImageGenerator imageGenerator = new CaptchaImageGenerator(properties);
+    final byte[] buffer = imageGenerator.createImage();
     // Create 1.7 grid
     final byte[][] grid = new byte[config.getImageWidth()][config.getImageHeight()];
     for (int i = 0; i < buffer.length; i++) {

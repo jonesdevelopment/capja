@@ -32,6 +32,9 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 @Getter
@@ -41,17 +44,17 @@ public final class CaptchaImageGenerator {
   private static final int[] FONT_TYPES = {Font.PLAIN, Font.BOLD};
   private static final String[] FONT_NAMES = {Font.DIALOG, Font.DIALOG_INPUT, Font.SANS_SERIF, Font.MONOSPACED};
 
-  private static final BufferedImageOp[] FILTERS = {
+  private static final List<BufferedImageOp> FILTERS = Arrays.asList(
     new CustomScratchFilter(8),
     //new OilFilter(), // blob-ify
     new UnsharpFilter(), // blur
     new MinimumFilter(), // crank image up
     new MaximumFilter(), // crank image down
-    new SaturationFilter(0.3f), // change saturation
     //new NoiseFilter(), // random noise
-  };
+    new SaturationFilter(0.3f) // change saturation
+  );
 
-  private final BufferedImageOp[] randomFilters;
+  private final List<BufferedImageOp> randomFilters = new ArrayList<>(5);
   private final CaptchaProperties properties;
   @Setter
   private BufferedImage bufferedImage;
@@ -61,18 +64,28 @@ public final class CaptchaImageGenerator {
     this.properties = properties;
 
     // Prepare filters
-    final FlareFilter flareFilter = new FlareFilter();
-    flareFilter.setRadius(properties.getConfig().getImageWidth() / 3f);
-    flareFilter.setBaseAmount(0.7f);
-    final RippleFilter rippleFilter = new RippleFilter();
-    rippleFilter.setXAmplitude(5 + (int) (0.5 - Math.random() * 3));
-    rippleFilter.setYAmplitude(10 + (int) (0.5 - Math.random() * 5));
-    final SmearFilter smearFilter = new SmearFilter();
-    smearFilter.setDensity(0.075f * (float) Math.random());
-    final PinchFilter pinchFilter = new PinchFilter();
-    pinchFilter.setAmount((float) (0.5 - Math.random()) * 0.1f);
-
-    this.randomFilters = new BufferedImageOp[]{flareFilter, rippleFilter, smearFilter, pinchFilter};
+    if (properties.getConfig().isFlare()) {
+      final FlareFilter flareFilter = new FlareFilter();
+      flareFilter.setRadius(properties.getConfig().getImageWidth() / 3f);
+      flareFilter.setBaseAmount(0.7f);
+      randomFilters.add(flareFilter);
+    }
+    if (properties.getConfig().isRipple()) {
+      final RippleFilter rippleFilter = new RippleFilter();
+      rippleFilter.setXAmplitude(5 + (int) (0.5 - Math.random() * 3));
+      rippleFilter.setYAmplitude(10 + (int) (0.5 - Math.random() * 5));
+      randomFilters.add(rippleFilter);
+    }
+    if (properties.getConfig().isSmear()) {
+      final SmearFilter smearFilter = new SmearFilter();
+      smearFilter.setDensity(0.075f * (float) Math.random());
+      randomFilters.add(smearFilter);
+    }
+    if (properties.getConfig().isPinch()) {
+      final PinchFilter pinchFilter = new PinchFilter();
+      pinchFilter.setAmount((float) (0.5 - Math.random()) * 0.1f);
+      randomFilters.add(pinchFilter);
+    }
   }
 
   public byte @NotNull [] createImage() {
@@ -91,11 +104,16 @@ public final class CaptchaImageGenerator {
     applyFilters(FILTERS);
     applyFilters(randomFilters);
 
+    /*try {
+      ImageIO.write(bufferedImage, "png", new File("1.png"));
+    } catch (Exception exception) {
+    }*/
+
     // Return converted color bytes
     return MCColorPaletteConverter.toMapBytes(bufferedImage);
   }
 
-  private void applyFilters(final BufferedImageOp @NotNull [] filters) {
+  private void applyFilters(final @NotNull List<BufferedImageOp> filters) {
     for (final BufferedImageOp filter : filters) {
       bufferedImage = filter.filter(bufferedImage, null);
     }

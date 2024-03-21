@@ -38,7 +38,8 @@ public final class CaptchaGenerator {
   private static final CaptchaConfiguration DEFAULT_CONFIG = new CaptchaConfiguration(
     128, 128, DEFAULT_DICTIONARY, 5,
     true, true, true, true, true,
-    0.3f, RANDOM, new int[]{Font.PLAIN, Font.BOLD},
+    0.3f, 2f, RANDOM,
+    new int[]{Font.PLAIN, Font.BOLD},
     new String[]{Font.DIALOG, Font.DIALOG_INPUT, Font.SANS_SERIF, Font.MONOSPACED});
 
   public CaptchaGenerator() {

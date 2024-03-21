@@ -29,7 +29,7 @@ public final class CaptchaConfiguration {
   private final char[] dictionary;
   private final int answerLength;
   private final boolean flare, scratches, ripple, smear, pinch;
-  private final float saturation;
+  private final float saturation, distortion;
   private final Random random;
   private final int[] fontTypes;
   private final String[] fontNames;

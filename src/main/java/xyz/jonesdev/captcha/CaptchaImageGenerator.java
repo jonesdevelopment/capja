@@ -69,6 +69,12 @@ public final class CaptchaImageGenerator {
       rippleFilter.setYAmplitude(10 + (float) ((0.5 - config.getRandom().nextDouble()) * 6));
       randomFilters.add(rippleFilter);
     }
+    {
+      final RippleFilter distortionFilter = new RippleFilter();
+      distortionFilter.setXAmplitude(config.getDistortion());
+      distortionFilter.setWaveType(RippleFilter.TRIANGLE);
+      randomFilters.add(distortionFilter);
+    }
     if (config.isSmear()) {
       final SmearFilter smearFilter = new SmearFilter();
       smearFilter.setDensity(0.075f * config.getRandom().nextFloat());

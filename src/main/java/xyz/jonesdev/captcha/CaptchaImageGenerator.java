@@ -47,42 +47,50 @@ public final class CaptchaImageGenerator {
   public CaptchaImageGenerator(final @NotNull CaptchaConfiguration config) {
     this.config = config;
 
-    // Prepare filters
+    // Add scratches (lines) to the background
     if (config.isScratches()) {
       final CustomScratchFilter scratchFilter = new CustomScratchFilter(
         5 + config.getRandom().nextInt(6));
       randomFilters.add(scratchFilter);
     }
-    randomFilters.add(new UnsharpFilter());
-    randomFilters.add(new MinimumFilter());
-    randomFilters.add(new MaximumFilter());
-    randomFilters.add(new SaturationFilter(config.getSaturation()));
+    // Apply random noise to the background
+    {
+      randomFilters.add(new UnsharpFilter());
+      randomFilters.add(new MinimumFilter());
+      randomFilters.add(new MaximumFilter());
+      randomFilters.add(new SaturationFilter(config.getSaturation()));
+    }
+    // Add flare effect to the background
     if (config.isFlare()) {
       final FlareFilter flareFilter = new FlareFilter();
-      flareFilter.setRadius(config.getImageWidth() / 3f);
+      flareFilter.setRadius(config.getImageWidth() / 3f + config.getRandom().nextFloat());
       flareFilter.setBaseAmount(0.7f);
       randomFilters.add(flareFilter);
     }
+    // Add ripple (wave) effect using sine
     if (config.isRipple()) {
       final RippleFilter rippleFilter = new RippleFilter();
-      rippleFilter.setXAmplitude(5 + (float) ((0.5 - config.getRandom().nextDouble()) * 3));
-      rippleFilter.setYAmplitude(10 + (float) ((0.5 - config.getRandom().nextDouble()) * 6));
+      rippleFilter.setXAmplitude(5 + (0.5f - config.getRandom().nextFloat()) * 3);
+      rippleFilter.setYAmplitude(10 + (0.5f - config.getRandom().nextFloat()) * 6);
       randomFilters.add(rippleFilter);
     }
+    // Apply triangular distortion (X only)
     {
       final RippleFilter distortionFilter = new RippleFilter();
       distortionFilter.setXAmplitude(config.getDistortion());
       distortionFilter.setWaveType(RippleFilter.TRIANGLE);
       randomFilters.add(distortionFilter);
     }
+    // Add smear (distorted pixels)
     if (config.isSmear()) {
       final SmearFilter smearFilter = new SmearFilter();
       smearFilter.setDensity(0.075f * config.getRandom().nextFloat());
       randomFilters.add(smearFilter);
     }
+    // Add pinch (smoothen)
     if (config.isPinch()) {
       final PinchFilter pinchFilter = new PinchFilter();
-      pinchFilter.setAmount((float) (0.5 - config.getRandom().nextDouble()) * 0.1f);
+      pinchFilter.setAmount((0.5f - config.getRandom().nextFloat()) * 0.1f);
       randomFilters.add(pinchFilter);
     }
   }

@@ -25,6 +25,40 @@
   [License](https://github.com/jonesdevelopment/sonar/?tab=readme-ov-file#license)
 </div>
 
+## Example
+
+<img src="example.png" alt="Could not find image">
+
+## Usage
+
+First, you create a CAPTCHA generator:
+
+```java
+import xyz.jonesdev.captcha.CaptchaGenerator;
+
+CaptchaGenerator generator = new CaptchaGenerator();
+```
+
+Now you can use generate a `CaptchaHolder` that holds the image and the answer to the CAPTCHA:
+
+```java
+import xyz.jonesdev.captcha.CaptchaGenerator;
+import xyz.jonesdev.captcha.CaptchaHolder;
+
+CaptchaGenerator generator = new CaptchaGenerator();
+CaptchaHolder holder = generator.generate();
+```
+
+You can now retrieve the image and answer from the holder:
+
+```java
+import java.awt.image.BufferedImage;
+
+//...
+String answer = holder.getAnswer();
+BufferedImage bufferedImage = holder.getImage();
+```
+
 ## License
 
 capja is licensed under the [GNU General Public License 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).

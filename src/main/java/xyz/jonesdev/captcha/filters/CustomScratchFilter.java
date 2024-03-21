@@ -33,18 +33,18 @@ public final class CustomScratchFilter extends AbstractBufferedImageOp {
   @Override
   public @NotNull BufferedImage filter(final @NotNull BufferedImage src, final BufferedImage dst) {
     final Graphics2D graphics = src.createGraphics();
-    final float l = 0.5f * (float) src.getWidth();
+    final float halfWidth = src.getWidth() * 0.5f;
 
     for (int i = 0; i < amount; ++i) {
-      final float x = (float) src.getWidth() * RANDOM.nextFloat();
-      final float y = (float) src.getHeight() * RANDOM.nextFloat();
-      final float a = 6.2831855f * (RANDOM.nextFloat() - 0.5f);
-      final float s = (float) Math.sin(a) * l;
-      final float c = (float) Math.cos(a) * l;
-      final float x1 = x - c;
-      final float y1 = y - s;
-      final float x2 = x + c;
-      final float y2 = y + s;
+      final float randomX = src.getWidth() * RANDOM.nextFloat();
+      final float randomY = src.getHeight() * RANDOM.nextFloat();
+      final float amplitude = 6.2831855f * (RANDOM.nextFloat() - 0.5f);
+      final float sin = (float) Math.sin(amplitude) * halfWidth;
+      final float cos = (float) Math.cos(amplitude) * halfWidth;
+      final float x1 = randomX - cos;
+      final float y1 = randomY - sin;
+      final float x2 = randomX + cos;
+      final float y2 = randomY + sin;
       graphics.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
     }
 

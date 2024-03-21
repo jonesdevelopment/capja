@@ -17,20 +17,23 @@
 
 package xyz.jonesdev.captcha.config;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
+import java.security.SecureRandom;
 import java.util.Random;
 
 @Getter
-@RequiredArgsConstructor
+@Setter
+@AllArgsConstructor
 public final class CaptchaConfiguration {
-  private final int imageWidth, imageHeight;
+  private int imageWidth, imageHeight;
   private final char[] dictionary;
-  private final int answerLength;
-  private final boolean flare, scratches, ripple, smear, pinch;
-  private final float saturation, distortion;
-  private final Random random;
-  private final int[] fontTypes;
-  private final String[] fontNames;
+  private int answerLength;
+  private boolean flare, scratches, ripple, smear, pinch;
+  private float saturation, distortion;
+  private int[] fontTypes;
+  private String[] fontNames;
+  private final Random random = new SecureRandom();
 }

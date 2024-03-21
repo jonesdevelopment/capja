@@ -19,12 +19,12 @@ package xyz.jonesdev.captcha;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import xyz.jonesdev.captcha.config.CaptchaConfiguration;
+
+import java.awt.image.BufferedImage;
 
 @Getter
 @RequiredArgsConstructor
-public final class CaptchaProperties {
+public final class CaptchaHolder {
   private final String answer;
-  private final char[] answerCharacters;
-  private final CaptchaConfiguration config;
+  private final BufferedImage image;
 }

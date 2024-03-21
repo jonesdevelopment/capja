@@ -27,6 +27,6 @@ import java.io.IOException;
 @UtilityClass
 public class Main {
   public void main(final String... args) throws IOException {
-    ImageIO.write(new CaptchaGenerator().generate(), "png", new File("1.png"));
+    ImageIO.write(new CaptchaGenerator().generate().getImage(), "png", new File("1.png"));
   }
 }

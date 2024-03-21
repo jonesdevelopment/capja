@@ -30,17 +30,15 @@ import java.util.Random;
 public final class CaptchaGenerator {
   private final CaptchaConfiguration config;
   private final char[] rawCaptchaAnswer;
-  private final CaptchaProperties properties;
   private final CaptchaImageGenerator captchaImageGenerator;
-  private @Nullable BufferedImage cachedCaptchaImage;
+  private @Nullable CaptchaHolder cachedCaptchaHolder;
 
-  private static final char[] DEFAULT_DICTIONARY = {'0', '1', '2', '3', '5', '6', '9'};
   private static final Random RANDOM = new Random();
-
+  private static final char[] DEFAULT_DICTIONARY = {'0', '1', '2', '3', '5', '6', '9'};
   private static final CaptchaConfiguration DEFAULT_CONFIG = new CaptchaConfiguration(
     128, 128, DEFAULT_DICTIONARY, 5,
     true, true, true, true, true,
-    RANDOM, new int[]{Font.PLAIN, Font.BOLD},
+    0.3f, RANDOM, new int[]{Font.PLAIN, Font.BOLD},
     new String[]{Font.DIALOG, Font.DIALOG_INPUT, Font.SANS_SERIF, Font.MONOSPACED});
 
   public CaptchaGenerator() {
@@ -49,16 +47,16 @@ public final class CaptchaGenerator {
 
   public CaptchaGenerator(final CaptchaConfiguration config) {
     this.config = config;
-    rawCaptchaAnswer = generateRandomAnswer();
-    this.properties = new CaptchaProperties(new String(rawCaptchaAnswer), rawCaptchaAnswer, config);
-    this.captchaImageGenerator = new CaptchaImageGenerator(properties);
+    this.rawCaptchaAnswer = generateRandomAnswer();
+    this.captchaImageGenerator = new CaptchaImageGenerator(config);
   }
 
-  public BufferedImage generate() {
-    if (cachedCaptchaImage == null) {
-      cachedCaptchaImage = captchaImageGenerator.createImage();
+  public synchronized CaptchaHolder generate() {
+    if (cachedCaptchaHolder == null) {
+      final BufferedImage image = captchaImageGenerator.createImage(rawCaptchaAnswer);
+      cachedCaptchaHolder = new CaptchaHolder(new String(rawCaptchaAnswer), image);
     }
-    return cachedCaptchaImage;
+    return cachedCaptchaHolder;
   }
 
   private char @NotNull [] generateRandomAnswer() {

@@ -19,6 +19,7 @@ package xyz.jonesdev.captcha.filters;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -30,7 +31,7 @@ public final class CustomScratchFilter extends AbstractBufferedImageOp {
   private final int amount;
 
   @Override
-  public BufferedImage filter(final BufferedImage src, final BufferedImage dst) {
+  public @NotNull BufferedImage filter(final @NotNull BufferedImage src, final BufferedImage dst) {
     final Graphics2D graphics = src.createGraphics();
     final float l = 0.5f * (float) src.getWidth();
 

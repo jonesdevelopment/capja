@@ -65,8 +65,8 @@ public final class CaptchaImageGenerator {
     }
     if (config.isRipple()) {
       final RippleFilter rippleFilter = new RippleFilter();
-      rippleFilter.setXAmplitude(5 + (int) (0.5 - config.getRandom().nextDouble() * 3));
-      rippleFilter.setYAmplitude(10 + (int) (0.5 - config.getRandom().nextDouble() * 6));
+      rippleFilter.setXAmplitude(5 + (float) ((0.5 - config.getRandom().nextDouble()) * 3));
+      rippleFilter.setYAmplitude(10 + (float) ((0.5 - config.getRandom().nextDouble()) * 6));
       randomFilters.add(rippleFilter);
     }
     if (config.isSmear()) {

@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 import xyz.jonesdev.captcha.config.CaptchaConfiguration;
 import xyz.jonesdev.captcha.filters.CustomScratchFilter;
-import xyz.jonesdev.captcha.palette.MCColorPaletteConverter;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
@@ -34,15 +33,11 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 @Getter
 public final class CaptchaImageGenerator {
-  private static final Random RANDOM = new Random();
-
-  private static final int[] FONT_TYPES = {Font.PLAIN, Font.BOLD};
-  private static final String[] FONT_NAMES = {Font.DIALOG, Font.DIALOG_INPUT, Font.SANS_SERIF, Font.MONOSPACED};
-
   private final List<BufferedImageOp> randomFilters = new ArrayList<>(9);
   private final CaptchaProperties properties;
   @Setter
@@ -54,7 +49,8 @@ public final class CaptchaImageGenerator {
 
     // Prepare filters
     if (properties.getConfig().isScratches()) {
-      final CustomScratchFilter scratchFilter = new CustomScratchFilter(5 + RANDOM.nextInt(6));
+      final CustomScratchFilter scratchFilter = new CustomScratchFilter(
+        5 + properties.getConfig().getRandom().nextInt(6));
       randomFilters.add(scratchFilter);
     }
     randomFilters.add(new UnsharpFilter());
@@ -85,9 +81,12 @@ public final class CaptchaImageGenerator {
     }
   }
 
-  public byte @NotNull [] createImage() {
+  @SuppressWarnings("unused")
+  public @NotNull BufferedImage createImage() {
     // Create an RGB buffered image for the CAPTCHA
-    bufferedImage = BackgroundImageGenerator.getRandomBackground(properties);
+    BufferedImage bufferedImage = new BufferedImage(
+      properties.getConfig().getImageWidth(), properties.getConfig().getImageHeight(), TYPE_INT_RGB);
+    bufferedImage = new CausticsFilter().filter(bufferedImage, null);
     // Get the 2D graphics object for the image
     graphics = (Graphics2D) bufferedImage.getGraphics();
 
@@ -101,14 +100,7 @@ public final class CaptchaImageGenerator {
     for (final BufferedImageOp filter : randomFilters) {
       bufferedImage = filter.filter(bufferedImage, null);
     }
-
-    /*try {
-      ImageIO.write(bufferedImage, "png", new File("1.png"));
-    } catch (Exception exception) {
-    }*/
-
-    // Return converted color bytes
-    return MCColorPaletteConverter.toMapBytes(bufferedImage);
+    return bufferedImage;
   }
 
   private void drawCharacters(final @NotNull BufferedImage bufferedImage,
@@ -118,7 +110,7 @@ public final class CaptchaImageGenerator {
     // Create font render context
     final FontRenderContext ctx = graphics.getFontRenderContext();
     final Font defaultFont = new Font(Font.DIALOG, Font.PLAIN,
-      47 + RANDOM.nextInt(6) - (config.getAnswerLength() * 2));
+      47 + properties.getConfig().getRandom().nextInt(6) - (config.getAnswerLength() * 2));
 
     // Calculate string width
     final double stringWidth = defaultFont.getStringBounds(chars, 0, chars.length, ctx).getWidth() * 0.9;
@@ -131,11 +123,16 @@ public final class CaptchaImageGenerator {
     for (final char character : chars) {
       graphics.setColor(getRandomColor(30, 90));
 
+      // Make sure to randomize the font name & type
+      final int randomFontType = config.getFontTypes()
+        [properties.getConfig().getRandom().nextInt(config.getFontTypes().length)];
+      final String randomFontName = config.getFontNames()
+        [properties.getConfig().getRandom().nextInt(config.getFontNames().length)];
       // Create a font with the chosen font name
+      @SuppressWarnings("all")
       final Font font = new Font(
         // 1 is easier to read for a human when Monospaced is used
-        character == 1 ? Font.MONOSPACED : FONT_NAMES[RANDOM.nextInt(FONT_NAMES.length)],
-        FONT_TYPES[RANDOM.nextInt(FONT_TYPES.length)], defaultFont.getSize());
+        character == 1 ? Font.MONOSPACED : randomFontName, randomFontType, defaultFont.getSize());
       graphics.setFont(font);
 
       // Create a glyph vector for the character
@@ -152,9 +149,9 @@ public final class CaptchaImageGenerator {
 
   public @NotNull Color getRandomColor(final @Range(from = 0, to = 255) int min,
                                        final @Range(from = 0, to = 255) int bound) {
-    final int r = Math.min(min + RANDOM.nextInt(bound), 255);
-    final int g = Math.min(min + RANDOM.nextInt(bound), 255);
-    final int b = Math.min(min + RANDOM.nextInt(bound), 255);
+    final int r = Math.min(min + properties.getConfig().getRandom().nextInt(bound), 255);
+    final int g = Math.min(min + properties.getConfig().getRandom().nextInt(bound), 255);
+    final int b = Math.min(min + properties.getConfig().getRandom().nextInt(bound), 255);
     return new Color(r, g, b);
   }
 }

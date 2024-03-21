@@ -20,6 +20,8 @@ package xyz.jonesdev.captcha.config;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Random;
+
 @Getter
 @RequiredArgsConstructor
 public final class CaptchaConfiguration {
@@ -27,4 +29,7 @@ public final class CaptchaConfiguration {
   private final char[] dictionary;
   private final int answerLength;
   private final boolean flare, scratches, ripple, smear, pinch;
+  private final Random random;
+  private final int[] fontTypes;
+  private final String[] fontNames;
 }

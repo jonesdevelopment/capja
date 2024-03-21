@@ -15,21 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.captcha;
+package xyz.jonesdev.captcha.test;
 
-import com.jhlabs.image.CausticsFilter;
 import lombok.experimental.UtilityClass;
+import xyz.jonesdev.captcha.CaptchaGenerator;
 
-import java.awt.image.BufferedImage;
-
-import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 
 @UtilityClass
-public class BackgroundImageGenerator {
-  public BufferedImage getRandomBackground(final CaptchaProperties properties) {
-    BufferedImage bufferedImage = new BufferedImage(
-      properties.getConfig().getImageWidth(), properties.getConfig().getImageHeight(), TYPE_INT_RGB);
-    bufferedImage = new CausticsFilter().filter(bufferedImage, null);
-    return bufferedImage;
+public class Main {
+  public void main(final String... args) throws IOException {
+    ImageIO.write(new CaptchaGenerator().generate(), "png", new File("1.png"));
   }
 }

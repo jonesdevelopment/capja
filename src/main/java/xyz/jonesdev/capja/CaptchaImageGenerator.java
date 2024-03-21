@@ -15,15 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.captcha;
+package xyz.jonesdev.capja;
 
 import com.jhlabs.image.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
-import xyz.jonesdev.captcha.config.CaptchaConfiguration;
-import xyz.jonesdev.captcha.filters.CustomScratchFilter;
+import xyz.jonesdev.capja.config.CaptchaConfiguration;
+import xyz.jonesdev.capja.filters.CustomScratchFilter;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;

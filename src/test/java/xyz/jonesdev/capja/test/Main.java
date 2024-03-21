@@ -15,10 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.captcha.test;
+package xyz.jonesdev.capja.test;
 
 import lombok.experimental.UtilityClass;
-import xyz.jonesdev.captcha.CaptchaGenerator;
+import xyz.jonesdev.capja.CaptchaGenerator;
 
 import javax.imageio.ImageIO;
 import java.io.File;

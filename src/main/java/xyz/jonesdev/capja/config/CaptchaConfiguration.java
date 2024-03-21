@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.captcha.config;
+package xyz.jonesdev.capja.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

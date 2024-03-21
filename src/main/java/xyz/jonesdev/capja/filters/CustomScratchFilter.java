@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.captcha.filters;
+package xyz.jonesdev.capja.filters;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
 import lombok.RequiredArgsConstructor;

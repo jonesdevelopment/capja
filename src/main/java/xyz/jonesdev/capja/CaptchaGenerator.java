@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.captcha;
+package xyz.jonesdev.capja;
 
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.jonesdev.captcha.config.CaptchaConfiguration;
+import xyz.jonesdev.capja.config.CaptchaConfiguration;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

@@ -42,7 +42,7 @@ tasks {
       // Set the implementation version, so we can create exact version
       // information in-game and make it accessible to the user.
       attributes["Implementation-Version"] = version
-      attributes["Implementation-Vendor"] = "Jones Development, Sonar Contributors"
+      attributes["Implementation-Vendor"] = "Jones Development"
     }
   }
 
@@ -57,7 +57,7 @@ tasks {
     isPreserveFileTimestamps = false
 
     // Relocate libraries
-    relocate("com.jhlabs", "xyz.jonesdev.captcha.libs.jhlabs")
+    relocate("com.jhlabs", "xyz.jonesdev.capja.libs.jhlabs")
 
     // Exclude unnecessary metadata information
     exclude("META-INF/*/**")

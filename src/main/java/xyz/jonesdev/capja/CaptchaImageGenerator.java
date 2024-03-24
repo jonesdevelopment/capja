@@ -108,6 +108,8 @@ public final class CaptchaImageGenerator {
     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     // Draw characters
     drawCharacters(bufferedImage, graphics, config, answer);
+    // Make sure to dispose the graphics after using it
+    graphics.dispose();
 
     // Apply filters
     for (final BufferedImageOp filter : randomFilters) {

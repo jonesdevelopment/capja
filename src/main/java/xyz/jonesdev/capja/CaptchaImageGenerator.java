@@ -64,7 +64,7 @@ public final class CaptchaImageGenerator {
     if (config.isFlare()) {
       final FlareFilter flareFilter = new FlareFilter();
       flareFilter.setRadius(config.getImageWidth() / 3f + config.getRandom().nextFloat());
-      flareFilter.setBaseAmount(0.7f);
+      flareFilter.setBaseAmount(0.3f);
       randomFilters.add(flareFilter);
     }
     // Add ripple (wave) effect using sine

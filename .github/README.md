@@ -25,9 +25,13 @@
   [License](https://github.com/jonesdevelopment/sonar/?tab=readme-ov-file#license)
 </div>
 
-## Example
+## Examples
 
+#### Generated image with default settings (24/03/2024)
 <img src="example.png" alt="Could not find image">
+
+#### capja being used in Minecraft as a CAPTCHA
+https://youtu.be/wCXbqUubDI8
 
 ## Usage
 

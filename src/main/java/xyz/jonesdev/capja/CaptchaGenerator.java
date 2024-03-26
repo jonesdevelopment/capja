@@ -36,7 +36,7 @@ public final class CaptchaGenerator {
   private static final Random RANDOM = new Random();
   private static final int[] FONT_TYPES = {Font.PLAIN, Font.BOLD};
   private static final String[] FONT_NAMES = {Font.DIALOG, Font.DIALOG_INPUT, Font.SANS_SERIF, Font.MONOSPACED};
-  private static final char[] DEFAULT_DICTIONARY = {'0', '1', '2', '3', '5', '6', '9'};
+  private static final char[] DEFAULT_DICTIONARY = {'1', '2', '3', '5', '6', '8', '9'};
 
   private static final CaptchaConfiguration DEFAULT_CONFIG = new CaptchaConfiguration(
     128, 128, DEFAULT_DICTIONARY, 5,

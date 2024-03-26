@@ -53,11 +53,14 @@ public final class CaptchaImageGenerator {
         5 + config.getRandom().nextInt(6));
       randomFilters.add(scratchFilter);
     }
-    // Apply random noise to the background
+    // Apply small blur effect
     {
       randomFilters.add(new UnsharpFilter());
       randomFilters.add(new MinimumFilter());
       randomFilters.add(new MaximumFilter());
+    }
+    // Apply color correction (saturation)
+    {
       randomFilters.add(new SaturationFilter(config.getSaturation()));
     }
     // Add flare effect to the background
@@ -103,8 +106,7 @@ public final class CaptchaImageGenerator {
     // Get the 2D graphics object for the image
     graphics = (Graphics2D) bufferedImage.getGraphics();
 
-    // Change some rendering hints for quality and performance
-    graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+    // Change some rendering hints for anti aliasing
     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     // Draw characters
     drawCharacters(bufferedImage, graphics, config, answer);

@@ -27,7 +27,7 @@
 
 ## Examples
 
-#### Generated image with default settings (24/03/2024)
+#### Generated image with default settings (26/03/2024)
 <img src="example.png" alt="Could not find image">
 
 #### capja being used in Minecraft as a CAPTCHA

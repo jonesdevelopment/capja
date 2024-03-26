@@ -20,7 +20,11 @@ package xyz.jonesdev.capja.config;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
+import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -29,11 +33,12 @@ import java.util.Random;
 @AllArgsConstructor
 public final class CaptchaConfiguration {
   private int imageWidth, imageHeight;
-  private final char[] dictionary;
-  private int answerLength;
+  private @Nullable InputStream backgroundImage;
+  private final char @NotNull [] dictionary;
+  private @Range(from = 1, to = 255) int answerLength;
   private boolean flare, scratches, ripple, smear, pinch;
   private float saturation, distortion;
-  private int[] fontTypes;
-  private String[] fontNames;
+  private int @NotNull [] fontTypes;
+  private @NotNull String[] fontNames;
   private final Random random = new SecureRandom();
 }

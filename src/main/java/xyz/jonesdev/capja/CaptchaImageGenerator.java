@@ -19,30 +19,29 @@ package xyz.jonesdev.capja;
 
 import com.jhlabs.image.*;
 import lombok.Getter;
-import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Range;
 import xyz.jonesdev.capja.config.CaptchaConfiguration;
 import xyz.jonesdev.capja.filters.CustomScratchFilter;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 @Getter
 public final class CaptchaImageGenerator {
-  private final List<BufferedImageOp> randomFilters = new ArrayList<>(9);
+  private final List<BufferedImageOp> textFilters = new ArrayList<>(9);
+  private final List<BufferedImageOp> backgroundFilters = new ArrayList<>(9);
   private final CaptchaConfiguration config;
-  @Setter
-  private BufferedImage bufferedImage;
-  private Graphics2D graphics;
 
   public CaptchaImageGenerator(final @NotNull CaptchaConfiguration config) {
     this.config = config;
@@ -51,74 +50,121 @@ public final class CaptchaImageGenerator {
     if (config.isScratches()) {
       final CustomScratchFilter scratchFilter = new CustomScratchFilter(
         5 + config.getRandom().nextInt(6));
-      randomFilters.add(scratchFilter);
+      textFilters.add(scratchFilter);
     }
     // Apply random noise to the background
     {
-      randomFilters.add(new UnsharpFilter());
-      randomFilters.add(new MinimumFilter());
-      randomFilters.add(new MaximumFilter());
-      randomFilters.add(new SaturationFilter(config.getSaturation()));
+      textFilters.add(new UnsharpFilter());
+      textFilters.add(new SaturationFilter(config.getSaturation()));
     }
     // Add flare effect to the background
     if (config.isFlare()) {
       final FlareFilter flareFilter = new FlareFilter();
       flareFilter.setRadius(config.getImageWidth() / 3f + config.getRandom().nextFloat());
       flareFilter.setBaseAmount(0.3f);
-      randomFilters.add(flareFilter);
+      backgroundFilters.add(flareFilter);
     }
     // Add ripple (wave) effect using sine
     if (config.isRipple()) {
       final RippleFilter rippleFilter = new RippleFilter();
       rippleFilter.setXAmplitude(5 + (0.5f - config.getRandom().nextFloat()) * 3);
       rippleFilter.setYAmplitude(10 + (0.5f - config.getRandom().nextFloat()) * 6);
-      randomFilters.add(rippleFilter);
+      textFilters.add(rippleFilter);
     }
     // Apply triangular distortion (X only)
     {
       final RippleFilter distortionFilter = new RippleFilter();
       distortionFilter.setXAmplitude(config.getDistortion());
       distortionFilter.setWaveType(RippleFilter.TRIANGLE);
-      randomFilters.add(distortionFilter);
+      textFilters.add(distortionFilter);
     }
     // Add smear (distorted pixels)
     if (config.isSmear()) {
       final SmearFilter smearFilter = new SmearFilter();
       smearFilter.setDensity(0.075f * config.getRandom().nextFloat());
-      randomFilters.add(smearFilter);
+      textFilters.add(smearFilter);
     }
     // Add pinch (smoothen)
     if (config.isPinch()) {
       final PinchFilter pinchFilter = new PinchFilter();
       pinchFilter.setAmount((0.5f - config.getRandom().nextFloat()) * 0.1f);
-      randomFilters.add(pinchFilter);
+      textFilters.add(pinchFilter);
     }
   }
 
   @SuppressWarnings("unused")
-  public @NotNull BufferedImage createImage(final char[] answer) {
-    // Create an RGB buffered image for the CAPTCHA
-    BufferedImage bufferedImage = new BufferedImage(config.getImageWidth(), config.getImageHeight(), TYPE_INT_RGB);
-    bufferedImage = new CausticsFilter().filter(bufferedImage, null);
-    // Get the 2D graphics object for the image
-    graphics = (Graphics2D) bufferedImage.getGraphics();
+  public BufferedImage createImage(final char[] answer) {
+    BufferedImage background = createBufferedImage();
 
-    // Change some rendering hints for quality and performance
-    graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+    final BufferedImage characters = createCharacters(background, answer);
+
+    final Graphics2D graphics = background.createGraphics();
+    graphics.drawImage(characters, 0, 0, config.getImageWidth(), config.getImageHeight(), null);
+    graphics.dispose();
+
+    // Modify saturation
+    background = new SaturationFilter(config.getSaturation()).filter(background, null);
+    return background;
+  }
+
+  private BufferedImage createCharacters(final BufferedImage background, final char[] answer) {
+    // Create a buffered image for the CAPTCHA generation
+    BufferedImage result = new BufferedImage(config.getImageWidth(), config.getImageHeight(), TYPE_INT_ARGB);
+    // Get the 2D graphics object for the image
+    final Graphics2D graphics = result.createGraphics();
+
+    // Change some rendering hints for anti aliasing
     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     // Draw characters
-    drawCharacters(bufferedImage, graphics, config, answer);
+    drawCharacters(result, background, graphics, config, answer);
     // Make sure to dispose the graphics after using it
     graphics.dispose();
 
     // Apply filters
-    for (final BufferedImageOp filter : randomFilters) {
+    for (final BufferedImageOp filter : textFilters) {
+      result = filter.filter(result, null);
+    }
+    return result;
+  }
+
+  private BufferedImage createBufferedImage() {
+    final int width = config.getImageWidth();
+    final int height = config.getImageHeight();
+    BufferedImage bufferedImage;
+
+    if (config.getBackgroundImage() != null) {
+      try {
+        // Load background from external image
+        bufferedImage = ImageIO.read(config.getBackgroundImage());
+
+        // Resize the image if it has an incorrect width or height
+        if (bufferedImage.getWidth() != width || bufferedImage.getHeight() != height) {
+          final Graphics2D graphics = bufferedImage.createGraphics();
+          bufferedImage = new BufferedImage(width, height, TYPE_INT_RGB);
+
+          graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+          graphics.drawImage(bufferedImage, 0, 0, width, height, null);
+          graphics.dispose();
+        }
+        return bufferedImage;
+      } catch (IOException exception) {
+        // Continue loading default background after warning the user
+      }
+    }
+
+    // Create an RGB buffered image
+    bufferedImage = new BufferedImage(width, height, TYPE_INT_RGB);
+    bufferedImage = new CausticsFilter().filter(bufferedImage, null);
+
+    // Apply background filters
+    for (final BufferedImageOp filter : backgroundFilters) {
       bufferedImage = filter.filter(bufferedImage, null);
     }
     return bufferedImage;
   }
 
   private void drawCharacters(final @NotNull BufferedImage bufferedImage,
+                              final @NotNull BufferedImage background,
                               final @NotNull Graphics2D graphics,
                               final @NotNull CaptchaConfiguration config,
                               final char[] chars) {
@@ -136,7 +182,10 @@ public final class CaptchaImageGenerator {
 
     // Draw each character one by one
     for (final char character : chars) {
-      graphics.setColor(getRandomColor(50, 90));
+      // Interpolate between background colors to make sure that the color we
+      // end up using for the characters is actually not too bright nor too dark
+      final int argb = background.getRGB((int) currentX + 5, (int) beginY + 5);
+      graphics.setColor(getRandomInversedColor(argb));
 
       // Make sure to randomize the font name & type
       final int randomFontType = config.getFontTypes()[config.getRandom().nextInt(config.getFontTypes().length)];
@@ -160,11 +209,11 @@ public final class CaptchaImageGenerator {
     }
   }
 
-  public @NotNull Color getRandomColor(final @Range(from = 0, to = 255) int min,
-                                       final @Range(from = 0, to = 255) int bound) {
-    final int r = Math.min(min + config.getRandom().nextInt(bound), 255);
-    final int g = Math.min(min + config.getRandom().nextInt(bound), 255);
-    final int b = Math.min(min + config.getRandom().nextInt(bound), 255);
-    return new Color(r, g, b);
+  private @NotNull Color getRandomInversedColor(final int argb) {
+    final Color darkOrNot = new Color(~argb);
+    final int r = Math.max(Math.min(darkOrNot.getRed() + (config.getRandom().nextInt(75) - 25), 255), 0);
+    final int g = Math.max(Math.min(darkOrNot.getGreen() + (config.getRandom().nextInt(75) - 25), 255), 0);
+    final int b = Math.max(Math.min(darkOrNot.getBlue() + (config.getRandom().nextInt(75) - 25), 255), 0);
+    return new Color(r, g, b, 255);
   }
 }

@@ -47,8 +47,10 @@ tasks {
   }
 
   shadowJar {
+    minimize()
+
     // Set the file name of the shadowed jar
-    archiveFileName.set("${rootProject.name}.jar")
+    archiveFileName.set("${rootProject.name}-${rootProject.version}.jar")
 
     // Remove file timestamps
     isPreserveFileTimestamps = false

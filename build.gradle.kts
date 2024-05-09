@@ -26,11 +26,11 @@ apply(plugin = "java")
 apply(plugin = "io.github.goooler.shadow")
 
 dependencies {
-  compileOnly("org.projectlombok:lombok:1.18.30")
-  annotationProcessor("org.projectlombok:lombok:1.18.30")
+  compileOnly("org.projectlombok:lombok:1.18.32")
+  annotationProcessor("org.projectlombok:lombok:1.18.32")
 
-  testCompileOnly("org.projectlombok:lombok:1.18.30")
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
+  testCompileOnly("org.projectlombok:lombok:1.18.32")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
 
   implementation("com.jhlabs:filters:2.0.235-1")
   compileOnly("org.jetbrains:annotations:24.0.1")

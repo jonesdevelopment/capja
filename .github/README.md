@@ -27,7 +27,7 @@
 
 ## Examples
 
-#### Generated image with default settings (26/03/2024)
+#### Generated image with default settings (2024/05/09)
 <img src="example.png" alt="Could not find image">
 
 #### capja being used in Minecraft as a CAPTCHA
@@ -35,32 +35,20 @@ https://youtu.be/wCXbqUubDI8
 
 ## Usage
 
-First, you create a CAPTCHA generator:
-
-```java
-import xyz.jonesdev.captcha.CaptchaGenerator;
-
-CaptchaGenerator generator = new CaptchaGenerator();
-```
-
-Now you can use generate a `CaptchaHolder` that holds the image and the answer to the CAPTCHA:
-
-```java
-import xyz.jonesdev.captcha.CaptchaGenerator;
-import xyz.jonesdev.captcha.CaptchaHolder;
-
-CaptchaGenerator generator = new CaptchaGenerator();
-CaptchaHolder holder = generator.generate();
-```
-
-You can now retrieve the image and answer from the holder:
-
 ```java
 import java.awt.image.BufferedImage;
 
-//...
-String answer = holder.getAnswer();
-BufferedImage bufferedImage = holder.getImage();
+// Creates a CAPTCHA generator instance
+simpleCaptchaGenerator = new SimpleCaptchaGenerator(width, height, null);
+
+// You can also use a custom background image
+simpleCaptchaGenerator = new SimpleCaptchaGenerator(width, height, new File("background.png"));
+
+// Creates a BufferedImage with the code 69420
+bufferedImage = simpleCaptchaGenerator.createImage(new char[]{'6', '9', '4', '2', '0'});
+
+// You can also use custom effects and filters
+bufferedImage = simpleCaptchaGenerator.createImage(/* ... */, new BumpFilter(), new SmearFilter());
 ```
 
 ## License

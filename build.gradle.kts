@@ -47,9 +47,6 @@ tasks {
   }
 
   shadowJar {
-    // Minimize jar
-    minimize()
-
     // Set the file name of the shadowed jar
     archiveFileName.set("${rootProject.name}.jar")
 

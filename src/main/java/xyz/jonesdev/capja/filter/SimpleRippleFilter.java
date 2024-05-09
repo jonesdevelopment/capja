@@ -15,16 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.capja;
+package xyz.jonesdev.capja.filter;
 
+import com.jhlabs.image.TransformFilter;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import java.awt.image.BufferedImage;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
-@RequiredArgsConstructor
-public final class CaptchaHolder {
-  private final String answer;
-  private final BufferedImage image;
+@Setter
+public final class SimpleRippleFilter extends TransformFilter {
+  private float xAmplitude, yAmplitude;
+
+  @Override
+  protected void transformInverse(final int x, final int y, final float @NotNull [] out) {
+    final float nx = (float) y / 13f;
+    final float ny = (float) x / 13f;
+    final float fx = (float) Math.sin(nx);
+    final float fy = (float) Math.sin(ny);
+
+    out[0] = (float) x + xAmplitude * fx;
+    out[1] = (float) y + yAmplitude * fy;
+  }
 }

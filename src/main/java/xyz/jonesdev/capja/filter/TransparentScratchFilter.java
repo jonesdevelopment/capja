@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.capja.filters;
+package xyz.jonesdev.capja.filter;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +26,21 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 @RequiredArgsConstructor
-public final class CustomScratchFilter extends AbstractBufferedImageOp {
+public final class TransparentScratchFilter extends AbstractBufferedImageOp {
   private static final Random RANDOM = new Random();
+
   private final int amount;
 
   @Override
   public @NotNull BufferedImage filter(final @NotNull BufferedImage src, final BufferedImage dst) {
     final Graphics2D graphics = src.createGraphics();
+
+    // Apply some gradient effect on them
+    final Color color0 = Color.getHSBColor(RANDOM.nextFloat(), RANDOM.nextFloat(), 1);
+    final Color color1 = new Color(~color0.getRGB());
+    final GradientPaint gradient = new GradientPaint(0, 0, color0, src.getWidth(), src.getHeight(), color1);
+    graphics.setPaint(gradient);
+
     final float halfWidth = src.getWidth() * 0.5f;
 
     for (int i = 0; i < amount; ++i) {

@@ -2,7 +2,7 @@
   <!-- Introduction -->
   <p>
     <h1>🤖 capja</h1>
-    Easy-to-use Java CAPTCHA image generation API
+    Easy-to-use Java CAPTCHA image generation API used by Sonar
   </p>
   
   <!-- Badges & icons -->
@@ -27,11 +27,11 @@
 
 ## Examples
 
-#### Generated image with default settings (2024/05/09)
-<img src="example.png" alt="Could not find image">
-
 #### capja being used in Minecraft as a CAPTCHA
 https://youtu.be/wCXbqUubDI8
+
+#### capja being integrated in Sonar
+[CaptchaPreparer.java](<https://github.com/jonesdevelopment/sonar/blob/main/sonar-common/src/main/java/xyz/jonesdev/sonar/common/fallback/protocol/captcha/CaptchaPreparer.java>) (using custom filters)
 
 ## Usage
 

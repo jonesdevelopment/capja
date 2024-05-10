@@ -57,6 +57,12 @@ public final class SimpleCaptchaGenerator {
       // Try loading the background image from the given file
       try {
         background = ImageIO.read(Objects.requireNonNull(backgroundImage));
+        // Throw error if dimensions mismatch
+        // (if the original image is bigger, this won't cause an issue)
+        if (background.getWidth() > width || background.getHeight() > height) {
+          throw new IllegalArgumentException("Expected " + width + "x" + height
+            + " but got " + background.getWidth() + "x" + background.getHeight());
+        }
       } catch (Exception exception) {
         // Don't use any special background image
         background = new BufferedImage(width, height, TYPE_INT_RGB);

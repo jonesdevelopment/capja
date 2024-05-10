@@ -34,6 +34,7 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
@@ -85,6 +86,12 @@ public final class SimpleCaptchaGenerator {
     graphics.drawImage(foreground, 0, 0, null);
     graphics.dispose();
     return image;
+  }
+
+  @SuppressWarnings("unused")
+  public @NotNull BufferedImage createImage(final char[] answer,
+                                            final @NotNull List<AbstractBufferedImageOp> filters) {
+    return createImage(answer, filters.toArray(new AbstractBufferedImageOp[0]));
   }
 
   public @NotNull BufferedImage createImage(final char[] answer,

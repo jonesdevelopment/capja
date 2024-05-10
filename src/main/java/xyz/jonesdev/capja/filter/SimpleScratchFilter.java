@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 @RequiredArgsConstructor
-public final class TransparentScratchFilter extends AbstractBufferedImageOp {
+public final class SimpleScratchFilter extends AbstractBufferedImageOp {
   private static final Random RANDOM = new Random();
 
   private final int amount;

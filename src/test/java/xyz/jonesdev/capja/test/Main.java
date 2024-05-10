@@ -22,7 +22,7 @@ import com.jhlabs.image.SmearFilter;
 import lombok.experimental.UtilityClass;
 import xyz.jonesdev.capja.SimpleCaptchaGenerator;
 import xyz.jonesdev.capja.filter.SimpleRippleFilter;
-import xyz.jonesdev.capja.filter.TransparentScratchFilter;
+import xyz.jonesdev.capja.filter.SimpleScratchFilter;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -53,7 +53,7 @@ public class Main {
     smearFilter.setDistance(5);
 
     // Scratches
-    final TransparentScratchFilter scratchFilter = new TransparentScratchFilter(5);
+    final SimpleScratchFilter scratchFilter = new SimpleScratchFilter(5);
 
     final long start = System.currentTimeMillis();
     final char[] dictionary = {'1', '2', '3', '5', '6', '8', '9'};

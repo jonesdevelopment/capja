@@ -92,14 +92,8 @@ public final class SimpleCaptchaGenerator {
     return image;
   }
 
-  @SuppressWarnings("unused")
   public @NotNull BufferedImage createImage(final char[] answer,
                                             final @NotNull List<AbstractBufferedImageOp> filters) {
-    return createImage(answer, filters.toArray(new AbstractBufferedImageOp[0]));
-  }
-
-  public @NotNull BufferedImage createImage(final char[] answer,
-                                            final AbstractBufferedImageOp @NotNull ... filters) {
     // Make sure we have a background image cached/generated
     createCachedBackgroundImage();
     // Get the background image and create a new foreground image

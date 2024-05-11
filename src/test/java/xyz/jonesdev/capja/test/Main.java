@@ -29,6 +29,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 @UtilityClass
@@ -74,7 +75,7 @@ public class Main {
 
     // Generate image
     final BufferedImage bufferedImage = simpleCaptchaGenerator.createImage(answer,
-      new BumpFilter(), scratchFilter, rippleFilter, smearFilter);
+      Arrays.asList(new BumpFilter(), scratchFilter, rippleFilter, smearFilter));
     System.out.println("Took " + (System.currentTimeMillis() - start) + "ms to create image(s)");
 
     // Save image

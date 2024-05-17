@@ -28,7 +28,7 @@
 ## Examples
 
 #### capja being used in Minecraft as a CAPTCHA
-https://youtu.be/wCXbqUubDI8
+https://youtu.be/Aw1w-7S0GjA
 
 #### capja being integrated in Sonar
 [CaptchaPreparer.java](<https://github.com/jonesdevelopment/sonar/blob/main/sonar-common/src/main/java/xyz/jonesdev/sonar/common/fallback/protocol/captcha/CaptchaPreparer.java>) (using custom filters)
